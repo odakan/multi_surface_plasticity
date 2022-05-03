@@ -30,18 +30,19 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "RoundedMohrCoulomb_multi_surface.h"
+#include "RoundedMohrCoulomb_yield_surface.h"
 // #include <Channel.h>
 // #include <HDF5_Channel.h>
 // #include <Matrix.h>
 // #include <ID.h>
 // #include <Vector.h>
 #include <vector>
+# define M_PI           3.14159265358979323846  /* pi */
 
 //================================================================================
 // Constructor
 //================================================================================
-RoundedMohrCoulomb_multi_surface::RoundedMohrCoulomb_multi_surface( 
+RoundedMohrCoulomb_yield_surface::RoundedMohrCoulomb_yield_surface( 
         int tag,
         double E_in,
         double v_in,
@@ -60,7 +61,7 @@ RoundedMohrCoulomb_multi_surface::RoundedMohrCoulomb_multi_surface(
     : 
     MultiYieldSurfaceMaterial( 
             tag, 
-            0, //ND_TAG_RoundedMohrCoulomb_multi_surface, 
+            0, //ND_TAG_RoundedMohrCoulomb_yield_surface, 
             E_in, 
             v_in, 
             rho_in, 
@@ -87,7 +88,7 @@ RoundedMohrCoulomb_multi_surface::RoundedMohrCoulomb_multi_surface(
 //================================================================================
 // Empty Constructor for parallel
 //================================================================================
-RoundedMohrCoulomb_multi_surface::RoundedMohrCoulomb_multi_surface( )
+RoundedMohrCoulomb_yield_surface::RoundedMohrCoulomb_yield_surface( )
     : 
     MultiYieldSurfaceMaterial(),
     pp0(0. ),
@@ -113,7 +114,7 @@ RoundedMohrCoulomb_multi_surface::RoundedMohrCoulomb_multi_surface( )
 //================================================================================
 // Destructor
 //================================================================================
-RoundedMohrCoulomb_multi_surface::~RoundedMohrCoulomb_multi_surface()
+RoundedMohrCoulomb_yield_surface::~RoundedMohrCoulomb_yield_surface()
 {
 
 }
@@ -123,7 +124,7 @@ RoundedMohrCoulomb_multi_surface::~RoundedMohrCoulomb_multi_surface()
 // ================================================================================
 // Return the yield surface Value
 // ================================================================================
-double RoundedMohrCoulomb_multi_surface::yield_surface_val(DTensor2 const& stress, DTensor2 const& alpha, double yield_sz){
+double RoundedMohrCoulomb_yield_surface::yield_surface_val(DTensor2 const& stress, DTensor2 const& alpha, double yield_sz){
 
 
     double pp = -1./3. * (stress(0,0)+stress(1,1)+stress(2,2)) ;
@@ -138,10 +139,10 @@ double RoundedMohrCoulomb_multi_surface::yield_surface_val(DTensor2 const& stres
 // ================================================================================
 // Return the normal to the yield surface w.r.t stress
 // ================================================================================
-DTensor2 RoundedMohrCoulomb_multi_surface::df_dsigma(int N_active_ys, DTensor2 const& stress){
+DTensor2 RoundedMohrCoulomb_yield_surface::df_dsigma(int N_active_ys, DTensor2 const& stress){
     if (N_active_ys > TNYS )
     {
-        cerr<< "RoundedMohrCoulomb_multi_surface::df_dsigma " <<endl;
+        cerr<< "RoundedMohrCoulomb_yield_surface::df_dsigma " <<endl;
         cerr<< "Exceed the length of iterate_alpha_vec " <<endl;
         cerr<< "N_active_ys " << N_active_ys <<endl;
         cerr<< "iterate_alpha_vec.size() " << iterate_alpha_vec.size() <<endl;
@@ -182,10 +183,10 @@ DTensor2 RoundedMohrCoulomb_multi_surface::df_dsigma(int N_active_ys, DTensor2 c
 // ================================================================================
 // Return the normal to the yield surface w.r.t alpha(backstress)
 // ================================================================================
-DTensor2 RoundedMohrCoulomb_multi_surface::df_dalpha(int N_active_ys, DTensor2 const& stress){
+DTensor2 RoundedMohrCoulomb_yield_surface::df_dalpha(int N_active_ys, DTensor2 const& stress){
     if (N_active_ys > TNYS )
     {
-        cerr<< "RoundedMohrCoulomb_multi_surface::df_dsigma " <<endl;
+        cerr<< "RoundedMohrCoulomb_yield_surface::df_dsigma " <<endl;
         cerr<< "Exceed the length of iterate_alpha_vec " <<endl;
         cerr<< "N_active_ys " << N_active_ys <<endl;
         cerr<< "iterate_alpha_vec.size() " << iterate_alpha_vec.size() <<endl;
@@ -216,7 +217,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::df_dalpha(int N_active_ys, DTensor2 c
 // ================================================================================
 // Return the plastic flow direction
 // ================================================================================
-DTensor2 RoundedMohrCoulomb_multi_surface::plastic_flow_direct(DTensor2 const& nn, DTensor2 const& stress, int N_active_ys ){
+DTensor2 RoundedMohrCoulomb_yield_surface::plastic_flow_direct(DTensor2 const& nn, DTensor2 const& stress, int N_active_ys ){
     static DTensor2 mm(3,3,0.);
     // (1) The deviatoric plastic flow is associative. 
     mm = nn;
@@ -252,7 +253,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::plastic_flow_direct(DTensor2 const& n
 // ================================================================================
 // Return the rate of alpha(backstress)
 // ================================================================================
-DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 const& stress){
+DTensor2 RoundedMohrCoulomb_yield_surface::alpha_bar(int N_active_ys, DTensor2 const& stress){
 
     DTensor2 curr_nn(3,3,0.);
     double pp = -1./3. * (stress(0,0)+stress(1,1)+stress(2,2)) ;
@@ -277,7 +278,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 c
 
     DTensor2 direct(3,3,0.);
     if(curr_sz == 0){
-        cerr<< "RoundedMohrCoulomb_multi_surface::alpha_bar " <<endl;
+        cerr<< "RoundedMohrCoulomb_yield_surface::alpha_bar " <<endl;
         cerr<< "curr_sz == 0 " <<endl;
         cerr<< "N_active_ys " << N_active_ys <<endl;
         cerr<< "yield_size.size() " << yield_size.size() <<endl;
@@ -288,7 +289,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 c
 
     double denom = sqrt(  direct(i,j)*direct(i,j)  );
     if(denom == 0){
-        cerr<< "RoundedMohrCoulomb_multi_surface::alpha_bar " <<endl;
+        cerr<< "RoundedMohrCoulomb_yield_surface::alpha_bar " <<endl;
         cerr<< "denom 1 == 0 " <<endl;
         cerr<< "N_active_ys " << N_active_ys <<endl;
         cerr<< "yield_size.size() " << yield_size.size() <<endl;
@@ -301,7 +302,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 c
     double H_prime = HardingPara[N_active_ys] ; 
     denom = curr_nn(i,j) * direct(i,j); 
     if(denom == 0){
-        cerr<< "RoundedMohrCoulomb_multi_surface::alpha_bar " <<endl;
+        cerr<< "RoundedMohrCoulomb_yield_surface::alpha_bar " <<endl;
         cerr<< "denom 2 == 0 " <<endl;
         cerr<< "N_active_ys " << N_active_ys <<endl;
         cerr<< "yield_size.size() " << yield_size.size() <<endl;
@@ -313,7 +314,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 c
 }
 
 
-// void RoundedMohrCoulomb_multi_surface::dq_dsigma_ij(DTensor2 const& sigma, DTensor2 const& alpha, DTensor2 & result) // Stress derivative of deviatoric stress q
+// void RoundedMohrCoulomb_yield_surface::dq_dsigma_ij(DTensor2 const& sigma, DTensor2 const& alpha, DTensor2 & result) // Stress derivative of deviatoric stress q
 // {
 //     static DTensor2 s(3, 3, 0.0);
 //     s *= 0;
@@ -339,7 +340,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 c
 //     return;
 // }
 
-// void RoundedMohrCoulomb_multi_surface::dq_dalpha_ij(DTensor2 const& sigma, DTensor2 const& alpha, DTensor2 & result) // Stress derivative of deviatoric stress q
+// void RoundedMohrCoulomb_yield_surface::dq_dalpha_ij(DTensor2 const& sigma, DTensor2 const& alpha, DTensor2 & result) // Stress derivative of deviatoric stress q
 // {
 //     static DTensor2 s(3, 3, 0.0);
 //     s *= 0;
@@ -364,7 +365,7 @@ DTensor2 RoundedMohrCoulomb_multi_surface::alpha_bar(int N_active_ys, DTensor2 c
 // }
 
 
-double RoundedMohrCoulomb_multi_surface::Rtheta(DTensor2 const& stress, DTensor2 const& alpha){
+double RoundedMohrCoulomb_yield_surface::Rtheta(DTensor2 const& stress, DTensor2 const& alpha){
 
     double rtheta{0.};
 
@@ -376,7 +377,7 @@ double RoundedMohrCoulomb_multi_surface::Rtheta(DTensor2 const& stress, DTensor2
 }
 
 
-void RoundedMohrCoulomb_multi_surface::dR_dsigma(DTensor2 const& stress, DTensor2 const& alpha, DTensor2& ret){
+void RoundedMohrCoulomb_yield_surface::dR_dsigma(DTensor2 const& stress, DTensor2 const& alpha, DTensor2& ret){
     double dr_dtheta = dR_dtheta(stress, alpha);
     static DTensor2 dtheta_dsigma(3,3,0.);
     static DTensor2 sigmaBar(3,3,0.); 
@@ -386,7 +387,7 @@ void RoundedMohrCoulomb_multi_surface::dR_dsigma(DTensor2 const& stress, DTensor
     ret(i,j) = dr_dtheta * dtheta_dsigma(i,j);
 }
 
-double RoundedMohrCoulomb_multi_surface::dR_dtheta(DTensor2 const& stress, DTensor2 const& alpha){
+double RoundedMohrCoulomb_yield_surface::dR_dtheta(DTensor2 const& stress, DTensor2 const& alpha){
     double sin3theta = calc_sin3theta(stress, alpha);
     double cos3theta = sqrt(1 - pow(sin3theta,2));
     double ret{0.};
@@ -399,7 +400,7 @@ double RoundedMohrCoulomb_multi_surface::dR_dtheta(DTensor2 const& stress, DTens
     return ret;
 }
 
-void RoundedMohrCoulomb_multi_surface::dR_dalpha(DTensor2 const& stress, DTensor2 const& alpha , DTensor2& ret){
+void RoundedMohrCoulomb_yield_surface::dR_dalpha(DTensor2 const& stress, DTensor2 const& alpha , DTensor2& ret){
     double dr_dtheta = dR_dtheta(stress, alpha);
     static DTensor2 dtheta_dalpha(3,3,0.);
     dtheta_dalpha_ij(stress, alpha, dtheta_dalpha);
@@ -407,7 +408,7 @@ void RoundedMohrCoulomb_multi_surface::dR_dalpha(DTensor2 const& stress, DTensor
 }
 
 
-void RoundedMohrCoulomb_multi_surface::dtheta_dsigma_ij(const DTensor2 & sigma, DTensor2 & ret) // Stress derivative of Lode angle
+void RoundedMohrCoulomb_yield_surface::dtheta_dsigma_ij(const DTensor2 & sigma, DTensor2 & ret) // Stress derivative of Lode angle
 {
     double I1, J2D, J3D, q, theta;
     double trace;
@@ -440,7 +441,7 @@ void RoundedMohrCoulomb_multi_surface::dtheta_dsigma_ij(const DTensor2 & sigma, 
 }
 
 
-void RoundedMohrCoulomb_multi_surface::dtheta_dalpha_ij (DTensor2 const& stress, DTensor2 const& alpha, DTensor2& ret){
+void RoundedMohrCoulomb_yield_surface::dtheta_dalpha_ij (DTensor2 const& stress, DTensor2 const& alpha, DTensor2& ret){
     double J2bar{0.}, J3bar{0.}, I1{0.} ;
     static DTensor2 ss(3,3,0.); 
     double pp = -1./3. * (stress(0,0) + stress(1,1) + stress(2,2));
@@ -451,7 +452,7 @@ void RoundedMohrCoulomb_multi_surface::dtheta_dalpha_ij (DTensor2 const& stress,
     J3bar *= 3. ;
     double for_square_root = 1 - 6 * pow(J3bar,2)/pow(J2bar,3);
     if(for_square_root < 0 ){
-        cerr<< " RoundedMohrCoulomb_multi_surface::dtheta_dalpha_ij " <<endl;
+        cerr<< " RoundedMohrCoulomb_yield_surface::dtheta_dalpha_ij " <<endl;
         cerr<< " Numerical Error: (1 - 6 * pow(J3bar,2)/pow(J2bar,3)) < 0 " <<endl;
     }
     ret(i,j) = 1./3. * sqrt(for_square_root) * (-1) * sqrt(6.) *
@@ -468,7 +469,7 @@ void RoundedMohrCoulomb_multi_surface::dtheta_dalpha_ij (DTensor2 const& stress,
 // //================================================================================
 // // Return the 6*6 Tangent matrix.
 // //================================================================================
-// DTensor2 const& RoundedMohrCoulomb_multi_surface::getTangent(void){
+// DTensor2 const& RoundedMohrCoulomb_yield_surface::getTangent(void){
 //     // =========================================================
 //     // (1) Update the modulus based on active yield surface.
 //     // =========================================================
@@ -507,7 +508,7 @@ void RoundedMohrCoulomb_multi_surface::dtheta_dalpha_ij (DTensor2 const& stress,
 //================================================================================
 // Return the 3*3*3*3 Tangent tensor.
 //================================================================================
-DTensor4 const& RoundedMohrCoulomb_multi_surface::getTangentTensor( void )
+DTensor4 const& RoundedMohrCoulomb_yield_surface::getTangentTensor( void )
 {
     // compute_tangent_tensor();
     return Ee;
@@ -516,7 +517,7 @@ DTensor4 const& RoundedMohrCoulomb_multi_surface::getTangentTensor( void )
 //================================================================================
 // Compute the Elastic Tangent Stiffness
 //================================================================================
-void RoundedMohrCoulomb_multi_surface::update_modulus(int N_active_ys, DTensor2 const& stress)
+void RoundedMohrCoulomb_yield_surface::update_modulus(int N_active_ys, DTensor2 const& stress)
 {
     Ee *= 0;
     // =========================================================
@@ -544,7 +545,7 @@ void RoundedMohrCoulomb_multi_surface::update_modulus(int N_active_ys, DTensor2 
     // }
 }
 
-void RoundedMohrCoulomb_multi_surface::compute_elastoplastic_tangent( int N_active_ys, DTensor2 const& intersection_stress , bool elastic){
+void RoundedMohrCoulomb_yield_surface::compute_elastoplastic_tangent( int N_active_ys, DTensor2 const& intersection_stress , bool elastic){
     DTensor2 curr_xi = df_dalpha(N_active_ys, intersection_stress);
     DTensor2 bar_alpha = alpha_bar(N_active_ys, intersection_stress);
     DTensor2 curr_nn = df_dsigma(N_active_ys,  intersection_stress);
@@ -582,8 +583,8 @@ void RoundedMohrCoulomb_multi_surface::compute_elastoplastic_tangent( int N_acti
 
 
 //================================================================================
-RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( void ){
-    RoundedMohrCoulomb_multi_surface *tmp = new RoundedMohrCoulomb_multi_surface( 
+RoundedMohrCoulomb_yield_surface *RoundedMohrCoulomb_yield_surface::getCopy( void ){
+    RoundedMohrCoulomb_yield_surface *tmp = new RoundedMohrCoulomb_yield_surface( 
             0, //this->getTag(),
             this->getE(),
             this->getv(),
@@ -609,9 +610,9 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 // //================================================================================
 // // Message passing for parallel
 // //================================================================================
-// int RoundedMohrCoulomb_multi_surface::sendSelf( int commitTag, Channel &theChannel )
+// int RoundedMohrCoulomb_yield_surface::sendSelf( int commitTag, Channel &theChannel )
 // {
-//     cerr<<"RoundedMohrCoulomb_multi_surface::sendSelf() is not implemented yet! " <<endl;
+//     cerr<<"RoundedMohrCoulomb_yield_surface::sendSelf() is not implemented yet! " <<endl;
 //     static ID idData(1);
 //     static Vector vectorData(3);
 //     static Matrix a(3, 3);
@@ -620,7 +621,7 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 
 //     if (theChannel.sendID(0, commitTag, idData) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::sendSelf -- could not send idData\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::sendSelf -- could not send idData\n";
 //         return -1;
 //     }
 
@@ -630,28 +631,28 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 
 //     if (theChannel.sendVector(0, commitTag, vectorData) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::sendSelf -- could not send vectorData\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::sendSelf -- could not send vectorData\n";
 //         return -1;
 //     }
 
 //     a.setData(CommitStress.data, 3, 3);
 //     if (theChannel.sendMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::sendSelf -- could not send CommitStress\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::sendSelf -- could not send CommitStress\n";
 //         return -1;
 //     }
 
 //     a.setData(CommitStrain.data, 3, 3);
 //     if (theChannel.sendMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::sendSelf -- could not send CommitStrain\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::sendSelf -- could not send CommitStrain\n";
 //         return -1;
 //     }
 
 //     a.setData(CommitPlasticStrain.data, 3, 3);
 //     if (theChannel.sendMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::sendSelf -- could not send CommitPlasticStrain\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::sendSelf -- could not send CommitPlasticStrain\n";
 //         return -1;
 //     }
 
@@ -661,23 +662,23 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 // //================================================================================
 // // Message passing for parallel
 // //================================================================================
-// int RoundedMohrCoulomb_multi_surface::receiveSelf( int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker )
+// int RoundedMohrCoulomb_yield_surface::receiveSelf( int commitTag, Channel &theChannel, FEM_ObjectBroker &theBroker )
 // {
-//     cerr<<"RoundedMohrCoulomb_multi_surface::receiveSelf() is not implemented yet! " <<endl;
+//     cerr<<"RoundedMohrCoulomb_yield_surface::receiveSelf() is not implemented yet! " <<endl;
 //     static ID idData(1);
 //     static Vector vectorData(3);
 //     static Matrix a(3, 3);
 
 //     if (theChannel.receiveID(0, commitTag, idData) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::receiveSelf -- could not receive idData\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::receiveSelf -- could not receive idData\n";
 //         return -1;
 //     }
 //     this->setTag(idData(0));
 
 //     if (theChannel.receiveVector(0, commitTag, vectorData) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::receiveSelf -- could not receive vectorData\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::receiveSelf -- could not receive vectorData\n";
 //         return -1;
 //     }
 //     E    =   vectorData(0) ;
@@ -686,7 +687,7 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 
 //     if (theChannel.receiveMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::receiveSelf -- could not receive Elastic Constant strain\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::receiveSelf -- could not receive Elastic Constant strain\n";
 //         return -1;
 //     }
 //     for (int ii = 0; ii < 3; ii++)
@@ -697,13 +698,13 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 
 //     if (theChannel.receiveMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::receiveSelf -- could not receive Elastic Constant strain\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::receiveSelf -- could not receive Elastic Constant strain\n";
 //         return -1;
 //     }
 
 //     if (theChannel.receiveMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::receiveSelf -- could not receive Elastic Constant strain\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::receiveSelf -- could not receive Elastic Constant strain\n";
 //         return -1;
 //     }
 //     for (int ii = 0; ii < 3; ii++)
@@ -714,7 +715,7 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 
 //     if (theChannel.receiveMatrix(0, 0, a) < 0)
 //     {
-//         cerr << "RoundedMohrCoulomb_multi_surface::receiveSelf -- could not receive Elastic Constant Tensor\n";
+//         cerr << "RoundedMohrCoulomb_yield_surface::receiveSelf -- could not receive Elastic Constant Tensor\n";
 //         return -1;
 //     }
 
@@ -723,16 +724,16 @@ RoundedMohrCoulomb_multi_surface *RoundedMohrCoulomb_multi_surface::getCopy( voi
 // }
 
 //================================================================================
-void RoundedMohrCoulomb_multi_surface::Print( ostream &s, int flag )
+void RoundedMohrCoulomb_yield_surface::Print( ostream &s, int flag )
 {
-    s << "RoundedMohrCoulomb_multi_surface::" << endl;
+    s << "RoundedMohrCoulomb_yield_surface::" << endl;
     // s << "\tTag:    " << this->getTag() << endl;
 
 
 }
 
 
-int RoundedMohrCoulomb_multi_surface::calc_I1J2J3(DTensor2 const& mystress, double& I1, double& J2, double& J3) const
+int RoundedMohrCoulomb_yield_surface::calc_I1J2J3(DTensor2 const& mystress, double& I1, double& J2, double& J3) const
 {
     // ------------------------------------------------------------
     // preliminary
@@ -763,7 +764,7 @@ int RoundedMohrCoulomb_multi_surface::calc_I1J2J3(DTensor2 const& mystress, doub
 // q = sqrt(3* J2)
 // cos(3*theta) = 3/2 * sqrt(3) * J3 / J2^(3/2)
 // ------------------------------------------------------------
-int RoundedMohrCoulomb_multi_surface::calc_pqtheta(DTensor2 const& sigma, double& p, double& q, double& theta) const
+int RoundedMohrCoulomb_yield_surface::calc_pqtheta(DTensor2 const& sigma, double& p, double& q, double& theta) const
 {
     double I1, J2, J3;
     calc_I1J2J3(sigma, I1, J2, J3);
@@ -793,7 +794,7 @@ int RoundedMohrCoulomb_multi_surface::calc_pqtheta(DTensor2 const& sigma, double
     return -1;
 }
 
-double RoundedMohrCoulomb_multi_surface::calc_sin3theta(DTensor2 const& stress, DTensor2 const& alpha){
+double RoundedMohrCoulomb_yield_surface::calc_sin3theta(DTensor2 const& stress, DTensor2 const& alpha){
     double sin3theta{0.}, J2bar{0.}, J3bar{0.}, I1{0.} ;
     static DTensor2 ss(3,3,0.); 
     double pp = -1./3. * (stress(0,0) + stress(1,1) + stress(2,2));
@@ -805,7 +806,7 @@ double RoundedMohrCoulomb_multi_surface::calc_sin3theta(DTensor2 const& stress, 
     sin3theta = - sqrt(6.) * J3bar/pow(J2bar,1.5);
     if (sin3theta >1)
     {
-        cerr<<" RoundedMohrCoulomb_multi_surface::calc_sin3theta " <<endl;
+        cerr<<" RoundedMohrCoulomb_yield_surface::calc_sin3theta " <<endl;
         cerr<<" Numerical Error: sin3theta >1 " <<endl;
     }
     return sin3theta;
@@ -815,10 +816,10 @@ double RoundedMohrCoulomb_multi_surface::calc_sin3theta(DTensor2 const& stress, 
 //================================================================================
 // The Getter
 //================================================================================
-double RoundedMohrCoulomb_multi_surface::getpp0() const {return pp0;}
-double RoundedMohrCoulomb_multi_surface::getpa() const {return pa;}
-double RoundedMohrCoulomb_multi_surface::getmodn() const {return modn;}
-double RoundedMohrCoulomb_multi_surface::getpc() const {return pc;}
-double RoundedMohrCoulomb_multi_surface::getkk() const {return kk;}
-double RoundedMohrCoulomb_multi_surface::getdeta() const {return deta;}
-double RoundedMohrCoulomb_multi_surface::getscal() const {return scal;}
+double RoundedMohrCoulomb_yield_surface::getpp0() const {return pp0;}
+double RoundedMohrCoulomb_yield_surface::getpa() const {return pa;}
+double RoundedMohrCoulomb_yield_surface::getmodn() const {return modn;}
+double RoundedMohrCoulomb_yield_surface::getpc() const {return pc;}
+double RoundedMohrCoulomb_yield_surface::getkk() const {return kk;}
+double RoundedMohrCoulomb_yield_surface::getdeta() const {return deta;}
+double RoundedMohrCoulomb_yield_surface::getscal() const {return scal;}

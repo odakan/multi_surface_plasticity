@@ -1,6 +1,6 @@
 // #include "MultiYieldSurfaceMaterial.h"
 // #include "RoundedMohrCoulomb_multi_surface.h"
-#include "vonMises_multi_surface.h"
+#include "vonMises_yield_surface.h"
 #include <fstream>
 #include <string>
 using namespace std;
@@ -41,7 +41,7 @@ int main(int argc, char const *argv[])
 	for(auto& item: HardingPara){
 		item *= scale_hardening;
 	}
-	auto theMaterial= new vonMises_multi_surface(
+	auto theMaterial= new vonMises_yield_surface(
 		material_tag,
 		E_in,
 		v_in,

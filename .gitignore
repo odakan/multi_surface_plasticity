@@ -2,5 +2,10 @@
 **/*.out
 **/*.html
 **/.depend
-
-
+**/*.exe
+**/*.txt
+**/*.png
+**/.vscode
+**/.vs
+**/.idea
+**/.pytest_cache

@@ -1,7 +1,7 @@
 // #include "MultiYieldSurfaceMaterial.h"
 // #include "RoundedMohrCoulomb_multi_surface.h"
 // #include "vonMises_multi_surface.h"
-#include "DruckerPrager_multi_yield_surface.h"
+#include "DruckerPrager_yield_surface.h"
 #include <fstream>
 #include <string>
 using namespace std;
@@ -64,7 +64,7 @@ int main(int argc, char const *argv[])
 	double deta_in = dilation_angle_eta ;    // 1.5  ;
 	double scal_in = diletion_scale ;    // 0.2  ;
 
-	auto theMaterial= new DruckerPrager_multi_yield_surface(
+	auto theMaterial= new DruckerPrager_yield_surface(
 		material_tag,
 		E_in,
 		v_in,

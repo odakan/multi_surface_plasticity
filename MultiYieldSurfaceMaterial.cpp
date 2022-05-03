@@ -103,9 +103,9 @@ MultiYieldSurfaceMaterial::MultiYieldSurfaceMaterial(
 {
     // make yield_size and HardingPara 1-based instead of 0-based.
     yield_size = radius_in ;
-    if(yield_size.size() == (uint) TNYS) { yield_size.insert(yield_size.begin(), 0) ;     }
+    if(yield_size.size() == (unsigned int) TNYS) { yield_size.insert(yield_size.begin(), 0) ;     }
     HardingPara = HardingPara_in;
-    if(HardingPara.size() == (uint) TNYS) { HardingPara.insert(HardingPara.begin(), E/2./(1+v)) ;     }
+    if(HardingPara.size() == (unsigned int) TNYS) { HardingPara.insert(HardingPara.begin(), E/2./(1+v)) ;     }
 
     initial_E = E_in;
 

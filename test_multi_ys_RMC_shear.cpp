@@ -1,6 +1,6 @@
 #include "MultiYieldSurfaceMaterial.h"
-#include "RoundedMohrCoulomb_multi_surface.h"
-#include "vonMises_multi_surface.h"
+#include "RoundedMohrCoulomb_yield_surface.h"
+#include "vonMises_yield_surface.h"
 #include <fstream>
 #include <string>
 using namespace std;
@@ -67,7 +67,7 @@ int main(int argc, char const *argv[])
 	double deta_in = dilation_angle_eta ;    // 1.5  ;
 	double scal_in = diletion_scale ;    // 0.2  ;
 
-	auto theMaterial= new RoundedMohrCoulomb_multi_surface(
+	auto theMaterial= new RoundedMohrCoulomb_yield_surface(
 		material_tag,
 		E_in,
 		v_in,

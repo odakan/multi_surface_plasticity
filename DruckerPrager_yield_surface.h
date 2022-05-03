@@ -50,8 +50,8 @@
 *     napomena = { local eCM2156 ; 6Feb2016}}                                                                   *
 *****************************************************************************************************************/
 
-#ifndef DruckerPrager_multi_yield_surface_H
-#define DruckerPrager_multi_yield_surface_H
+#ifndef DruckerPrager_yield_surface_H
+#define DruckerPrager_yield_surface_H
 
 #include "MultiYieldSurfaceMaterial.h"
 // #include <G3Globals.h>
@@ -62,10 +62,10 @@
 #include "./ltensor/LTensor.h"
 using namespace std;
 
-class DruckerPrager_multi_yield_surface : public MultiYieldSurfaceMaterial
+class DruckerPrager_yield_surface : public MultiYieldSurfaceMaterial
 {
 public:
-    DruckerPrager_multi_yield_surface( 
+    DruckerPrager_yield_surface( 
         int tag,
         double E_in,
         double v_in,
@@ -80,8 +80,8 @@ public:
         vector<double> const& yield_size_in ,
         vector<double> const& HardingPara 
     );                                                                 // Constructor for DSL
-    DruckerPrager_multi_yield_surface();                               // Empty Constructor for Parallel
-    virtual ~DruckerPrager_multi_yield_surface( void );                // Destructor
+    DruckerPrager_yield_surface();                               // Empty Constructor for Parallel
+    virtual ~DruckerPrager_yield_surface( void );                // Destructor
 
     
     // Message Passing in Parallel 
@@ -90,12 +90,12 @@ public:
 
     
     // Getter
-    virtual DruckerPrager_multi_yield_surface *getCopy( void );
+    virtual DruckerPrager_yield_surface *getCopy( void );
     virtual DTensor4 const& getTangentTensor( void );
     virtual void compute_elastoplastic_tangent( int N_active_ys, DTensor2 const& intersection_stress , bool elastic=false ); 
     virtual void Print( ostream &s, int flag = 0 );
-    virtual const char *getType( void ) const{return "DruckerPrager_multi_yield_surface";};
-    virtual const char *getClassType( void ) const{return "DruckerPrager_multi_yield_surface";};
+    virtual const char *getType( void ) const{return "DruckerPrager_yield_surface";};
+    virtual const char *getClassType( void ) const{return "DruckerPrager_yield_surface";};
     virtual int getObjectSize(){return sizeof(*this);};
 
     double getpp0() const;                 // Return the material constant pp0
